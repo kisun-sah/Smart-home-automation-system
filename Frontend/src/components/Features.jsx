@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+
 import {
   FaFan,
   FaTemperatureHigh,
@@ -11,6 +11,9 @@ import {
   FaBell,
   FaWater
 } from 'react-icons/fa';
+import { useState } from 'react';
+import { X } from 'lucide-react'; // Lucide icon for cross (❌)
+import { motion, AnimatePresence } from 'framer-motion'; // for animations
 
 const FanControl = () => {
   const [isOn, setIsOn] = useState(false);
@@ -183,18 +186,18 @@ const featuresData = [
 const Features = () => {
   const [activeFeature, setActiveFeature] = useState(null);
 
-  const closeModal = () => setActiveFeature(null);
+  const selectedFeature = featuresData.find(feature => feature.id === activeFeature);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center px-4 py-10">
-
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center px-4 py-10 relative">
       <h2 className="text-4xl font-bold mb-10 text-gray-800">Smart Home Features</h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 max-w-6xl">
-        {featuresData.map((feature) => (
+      {/* Feature Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 max-w-6xl z-10">
+        {featuresData.map(feature => (
           <div
             key={feature.id}
-            onClick={() => setActiveFeature(feature)}
+            onClick={() => setActiveFeature(feature.id)}
             className="cursor-pointer bg-white p-6 rounded-2xl shadow-lg flex flex-col items-center hover:scale-105 hover:shadow-xl transition-transform duration-300"
           >
             {feature.icon}
@@ -203,23 +206,47 @@ const Features = () => {
         ))}
       </div>
 
-      {activeFeature && (
-  <div className="fixed inset-0 backdrop-blur-sm bg-opacity-10 flex items-center justify-center z-50">
+      {/* Animated Feature Panel */}
+      <AnimatePresence>
+        {selectedFeature && (
+          <motion.div
+            key={selectedFeature.id}
+            initial={{ x: -100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -100, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className="fixed top-24 left-6 w-80 h-[80vh] bg-white rounded-2xl shadow-2xl p-6 overflow-auto z-50 border border-blue-100 flex flex-col justify-between"
+          >
+            {/* Close Button */}
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-2xl font-bold text-blue-700">{selectedFeature.title}</h3>
+              <button
+                onClick={() => setActiveFeature(null)}
+                className="text-gray-400 hover:text-red-500 transition-colors duration-200"
+              >
+                <X size={24} />
+              </button>
+            </div>
 
-          <div className="bg-gray-100 w-[90%] max-w-xl h-auto rounded-2xl shadow-xl p-6 flex flex-col justify-center items-center relative text-center">
-            <button
-              onClick={closeModal}
-              className="absolute top-2 right-3 text-xl text-gray-500 hover:text-red-500"
-            >
-              &times;
-            </button>
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">{activeFeature.title}</h2>
-            <div className="text-gray-600 text-lg w-full">{activeFeature.content}</div>
-          </div>
-        </div>
-      )}
+            {/* Dynamic Status Message */}
+            <div className="mb-4 px-4 py-2 bg-blue-100 text-blue-800 rounded shadow text-sm">
+              {/* You can pass dynamic messages from each feature */}
+              {selectedFeature.message || `Your ${selectedFeature.title.toLowerCase()} is active.`}
+            </div>
+
+            {/* Control Content */}
+            <div>{selectedFeature.content}</div>
+
+            {/* Alert Section */}
+            <div className="mt-4 text-sm text-gray-500 italic text-center">
+              ⚠️ Make sure the device is connected properly.
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
 
 export default Features;
+

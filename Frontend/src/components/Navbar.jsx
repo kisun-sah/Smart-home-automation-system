@@ -28,7 +28,7 @@ const Navbar = () => {
           </li>
           {/* Avatar Icon */}
           <li>
-            <FaUserCircle className="text-3xl text-blue-600 ml-4 cursor-pointer hover:text-blue-800 transition duration-200" />
+       <Link to="/profile" >         <FaUserCircle className="text-3xl text-blue-600 ml-4 cursor-pointer hover:text-blue-800 transition duration-200" /></Link>
           </li>
         </ul>
 

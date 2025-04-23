@@ -2,6 +2,48 @@ import React from 'react'
 import img from '../assets/blog.png'
 import { FaLightbulb, FaLock, FaMobileAlt, FaWifi } from 'react-icons/fa'
 import Features from '../components/Features'
+import  { createContext, useState, useContext } from 'react';
+
+const SmartHomeContext = createContext();
+
+export const useSmartHome = () => {
+  return useContext(SmartHomeContext);
+};
+
+export const SmartHomeProvider = ({ children }) => {
+  const [featuresState, setFeaturesState] = useState({
+    fan: false,
+    temperature: 24,
+    light: false,
+    tv: false,
+    lock: true,
+    music: false,
+    door: false,
+    camera: false,
+    bell: false,
+    water: false,
+  });
+
+  const toggleFeature = (feature) => {
+    setFeaturesState((prevState) => ({
+      ...prevState,
+      [feature]: !prevState[feature],
+    }));
+  };
+
+  const setTemperature = (temp) => {
+    setFeaturesState((prevState) => ({
+      ...prevState,
+      temperature: temp,
+    }));
+  };
+
+  return (
+    <SmartHomeContext.Provider value={{ featuresState, toggleFeature, setTemperature }}>
+      {children}
+    </SmartHomeContext.Provider>
+  );
+};
 
 const Homepage = () => {
   return (
