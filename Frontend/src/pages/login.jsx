@@ -1,16 +1,27 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // for navigation
+import React, { useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../components/contex/user.context";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { setUser } = useContext(UserContext); // Access the UserContext to set the user
 
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
   });
 
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Check if the user is already logged in by verifying the token
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/"); // Redirect to home if token exists
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -35,14 +46,28 @@ const Login = () => {
 
       if (response.ok) {
         setMessage("Login successful!");
-        // Save token/user if provided
+        alert("Successful Login!");
+
+        // Save token to localStorage
         localStorage.setItem("token", data.token);
-        navigate("/"); // or your desired route
+        
+
+        // Set user in UserContext
+        setUser({
+          name: data.name,
+          email: formData.email,
+          token: data.token,
+        });
+
+        // Redirect to the homepage
+        navigate("/");
       } else {
         setMessage(data.message || "Invalid credentials!");
+        alert("Invalid credentials!");
       }
     } catch (error) {
       setMessage("Something went wrong. Please try again.");
+      console.error("Login error:", error);
     } finally {
       setLoading(false);
     }
@@ -60,7 +85,9 @@ const Login = () => {
 
       <div className="w-full md:w-3/5 flex items-center justify-center bg-gradient-to-r from-gray-100 to-gray-300 p-8">
         <div className="max-w-md w-full bg-white p-8 rounded-3xl shadow-xl">
-          <h2 className="text-3xl font-bold text-gray-800 text-center">Login</h2>
+          <h2 className="text-3xl font-bold text-gray-800 text-center">
+            Login
+          </h2>
           <p className="text-sm text-gray-500 text-center mb-6">
             Join the future of smart living
           </p>

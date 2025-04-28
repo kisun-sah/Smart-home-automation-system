@@ -6,16 +6,44 @@ const Profile = () => {
     email: "",
     token: "",
   });
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    // Retrieve user data from localStorage
-    const token = localStorage.getItem("token");
-    const name = localStorage.getItem("name");
-    const email = localStorage.getItem("email");
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("token");
 
-    if (token && name && email) {
-      setUserData({ name, email, token });
-    }
+      if (!token) {
+        setError("No token found. Please log in.");
+        return;
+      }
+
+      try {
+        const response = await fetch("http://localhost:5000/api/auth/profile", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          setError(data.msg || "Failed to fetch profile data.");
+          return;
+        }
+
+        const data = await response.json();
+        setUserData({
+          name: data.name,
+          email: data.email,
+          token: token,
+        });
+      } catch (err) {
+        console.error("Error fetching profile:", err);
+        setError("An error occurred while fetching profile data.");
+      }
+    };
+
+    fetchProfile();
   }, []);
 
   return (
@@ -24,24 +52,32 @@ const Profile = () => {
         <h2 className="text-3xl font-bold text-gray-800 mb-2">Welcome Back!</h2>
         <p className="text-gray-500 mb-6">Here's your profile info</p>
 
-        <div className="text-left space-y-4">
-          <div>
-            <label className="text-sm text-gray-500">Name</label>
-            <p className="text-lg font-semibold text-gray-800">{userData.name}</p>
-          </div>
+        {error ? (
+          <p className="text-red-500">{error}</p>
+        ) : (
+          <div className="text-left space-y-4">
+            <div>
+              <label className="text-sm text-gray-500">Name</label>
+              <p className="text-lg font-semibold text-gray-800">
+                {userData.name}
+              </p>
+            </div>
 
-          <div>
-            <label className="text-sm text-gray-500">Email</label>
-            <p className="text-lg font-semibold text-gray-800">{userData.email}</p>
-          </div>
+            <div>
+              <label className="text-sm text-gray-500">Email</label>
+              <p className="text-lg font-semibold text-gray-800">
+                {userData.email}
+              </p>
+            </div>
 
-          <div>
-            <label className="text-sm text-gray-500">Token</label>
-            <p className="text-sm text-gray-600 break-words bg-gray-100 p-2 rounded-md">
-              {userData.token}
-            </p>
+            <div>
+              <label className="text-sm text-gray-500">Token</label>
+              <p className="text-sm text-gray-600 break-words bg-gray-100 p-2 rounded-md">
+                {userData.token}
+              </p>
+            </div>
           </div>
-        </div>
+        )}
 
         <button
           className="mt-6 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-transform hover:scale-105"
